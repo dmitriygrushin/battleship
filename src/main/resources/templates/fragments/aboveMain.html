@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+    xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+
+<head>
+  	<title>Welp ¯\_(ツ)_/¯</title>
+  	<meta charset="UTF-8" />
+  	<meta name="viewport" content="width=device-width,initial-scale=1" />
+  	<meta name="description" content="" />
+
+  	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5/dist/superhero/bootstrap.min.css">
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+</head>
+
+<body class="d-flex flex-column min-vh-100">
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/">Welp</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarColor01">
+      <ul class="navbar-nav me-auto">
+		<li sec:authorize="isAnonymous()" class="nav-item">
+		 <a class="nav-link" th:href="@{/register}">Register</a>
+		</li>
+		<li sec:authorize="isAnonymous()" class="nav-item">
+		 <a class="nav-link" th:href="@{/login}">Login</a>
+		</li>
+		<li sec:authorize="isAuthenticated()" class="nav-item">
+		 <a class="nav-link" href="javascript: document.logoutForm.submit()" role="menuitem">Logout</a>
+		</li>
+		<li sec:authorize="isAuthenticated()" class="nav-item">
+		 <a class="nav-link" th:href="@{/review/my-list}" role="menuitem">My Reviews</a>
+		</li>
+      </ul>
+      <form class="d-flex">
+        <input class="form-control me-sm-2" type="text" placeholder="Search">
+        <button class="btn btn-secondary my-2 my-sm-0" type="submit">Search</button>
+      </form>
+    </div>
+  </div>
+</nav>
+
+
+<form name="logoutForm" th:action="@{/logout}" method="POST" th:hidden="true">
+  <input hidden type="submit" value="Sign Out"/>
+</form> 
+
+<main>
