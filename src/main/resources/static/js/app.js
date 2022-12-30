@@ -1,5 +1,3 @@
-alert("is this thing working?")
-
 let stompClient = null;
 let roomId = (() => {
 	const queryString = window.location.search;
@@ -7,6 +5,8 @@ let roomId = (() => {
 	return urlParams.get('roomId');
 })();
 
+
+if (!roomId) alert("You don't have a room number!");
 
 function setConnected(connected) {
     $("#connect").prop("disabled", connected);

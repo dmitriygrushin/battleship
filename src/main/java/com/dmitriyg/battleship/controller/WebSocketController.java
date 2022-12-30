@@ -1,5 +1,7 @@
 package com.dmitriyg.battleship.controller;
 
+import java.security.Principal;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -16,12 +18,12 @@ public class WebSocketController {
 	// used instead of @SendTo so that I could have dynamic rooms 
 	// (@SendTo("/room/tempRoom") // where client subscribes to)
 	private SimpMessagingTemplate simpMessagingTemplate; 
+	
 
 	@MessageMapping("message/{roomId}") // client uses: "/battleship/message" to send data
-	public void messageReceiveSend(ChatMessage message, @DestinationVariable int roomId) {
-		this.simpMessagingTemplate.convertAndSend("/room/" + roomId,
-			new ChatMessage(HtmlUtils.htmlEscape(message.getMessage())));
-		
+	public void messageReceiveSend(ChatMessage message, @DestinationVariable int roomId, Principal principal) {
+		simpMessagingTemplate.convertAndSend("/room/" + roomId,
+			new ChatMessage(HtmlUtils.htmlEscape(principal.getName() + ": " + message.getMessage())));
 	}
 
 }
