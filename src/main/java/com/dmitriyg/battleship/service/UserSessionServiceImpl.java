@@ -1,16 +1,20 @@
 package com.dmitriyg.battleship.service;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.broker.SubscriptionRegistry;
+import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 import org.springframework.web.util.HtmlUtils;
 
-import com.dmitriyg.battleship.model.ChatMessage;
+import com.dmitriyg.battleship.model.MessagingData;
 import com.dmitriyg.battleship.model.UserSession;
 import com.dmitriyg.battleship.repository.UserSessionRepository;
 
@@ -19,30 +23,14 @@ public class UserSessionServiceImpl implements UserSessionService {
 
 	@Autowired
 	private UserSessionRepository userSessionRepository;
-	
 	@Autowired
 	private SimpMessagingTemplate simpMessagingTemplate; 
-
-	// add user to userSessionRepository and alert the user's destination of the user's connection
-	@Override
-	public void add(SessionSubscribeEvent event) {
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(event.getMessage());
-		userSessionRepository.add(headers.getSessionId(), new UserSession(headers.getUser(), headers.getDestination()));
-		alertDestinationOnSubscribe(headers);
-	}
+	@Autowired
+	private SimpUserRegistry userRegistry;
 
 	@Override
 	public UserSession getUserSession(String sessionId) {
 		return userSessionRepository.getUserSession(sessionId);
-	}
-
-	// remove user from userSessionRepository and alert the user's destination of the user's disconnection
-	@Override
-	public void remove(SessionDisconnectEvent event) {
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(event.getMessage());
-		UserSession userSession = userSessionRepository.getUserSession(headers.getSessionId());
-		userSessionRepository.remove(headers.getSessionId());
-		alertDestinationOnDisconnect(userSession);
 	}
 
 	@Override
@@ -55,18 +43,62 @@ public class UserSessionServiceImpl implements UserSessionService {
 		userSessionRepository.setActiveUserSessions(activeUserSessions);
 	}
 	
-	private void alertDestinationOnSubscribe(SimpMessageHeaderAccessor headers) {
+	@Override
+	public void add(SimpMessageHeaderAccessor headers) {
+		userSessionRepository.add(headers.getSessionId(), new UserSession(headers.getUser(), headers.getDestination()));
+	}
+
+	@Override
+	public void remove(SimpMessageHeaderAccessor headers) {
+		UserSession userSession = userSessionRepository.getUserSession(headers.getSessionId());
+		userSessionRepository.remove(headers.getSessionId());
+	}
+
+	@Override
+	public void alertDestinationOnSubscribe(SimpMessageHeaderAccessor headers) {
 		simpMessagingTemplate.convertAndSend(headers.getDestination(), 
-				new ChatMessage(HtmlUtils.htmlEscape(
+				new MessagingData("user-status", HtmlUtils.htmlEscape(
 						"---" + headers.getUser().getName() + " has JOINED the room!---")));
 	}
 
-	// using UserSession instead of SimpMessageHeaderAccessor like in ...OnSubscribe because on disconnect the event doesn't have a destination
-	private void alertDestinationOnDisconnect(UserSession userSession) {
+	@Override
+	public void alertDestinationOnDisconnect(SimpMessageHeaderAccessor headers) {
+		// A userSession is RETRIEVED since on DISCONNECT the DESTINATION is lost from the HEADERS. 
+		UserSession userSession = userSessionRepository.getUserSession(headers.getSessionId());
+
 		simpMessagingTemplate.convertAndSend(userSession.getDestination(), 
-				new ChatMessage(HtmlUtils.htmlEscape(
+				new MessagingData("user-status", HtmlUtils.htmlEscape(
 						"---" + userSession.getPrincipal().getName() + " has LEFT the room!---")));
 	}
+	
+	@Override
+	public void updateUserListOnSubscribe(SimpMessageHeaderAccessor headers) {
+		Set<String> users = findUsersSubscribedToTopic(headers.getDestination());
+		
+		simpMessagingTemplate.convertAndSend(headers.getDestination(), 
+				new MessagingData("user-status", HtmlUtils.htmlEscape("there are now (" + users.size() + ") users in room: " + headers.getDestination())));
+	}
 
+	@Override
+	public void updateUserListOnDisconnect(SimpMessageHeaderAccessor headers) { 
+		// A userSession is RETRIEVED since on DISCONNECT the DESTINATION is lost from the HEADERS. 
+		UserSession userSession = userSessionRepository.getUserSession(headers.getSessionId());
 
+		Set<String> users = findUsersSubscribedToTopic(userSession.getDestination());
+		
+		simpMessagingTemplate.convertAndSend(userSession.getDestination(), 
+				new MessagingData("user-status", HtmlUtils.htmlEscape("there are now (" + users.size() + ") users in room: " + userSession.getDestination())));
+	}
+	
+	private Set<String> findUsersSubscribedToTopic(String topic) {
+		Set<String> users = new HashSet<>();
+		
+		userRegistry.findSubscriptions(subscription -> 
+			subscription.getDestination().equals(topic))
+		.forEach(subscription -> 
+			users.add(subscription.getSession().getUser().getName())
+		);
+		
+		return users;
+	}
 }

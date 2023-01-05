@@ -27,7 +27,9 @@ function connect() {
         setConnected(true);
         console.log('Connected: ' + frame);
         stompClient.subscribe(`/room/${roomId}`, (message) => {
-            showGreeting(JSON.parse(message.body));
+			let parsedMessage = JSON.parse(message.body);
+			if (parsedMessage.type == "chat-message") showChatMessage(parsedMessage);
+			if (parsedMessage.type == "user-status") showUserStatus(parsedMessage);
         });
     });
 }
@@ -41,12 +43,15 @@ function disconnect() {
 }
 
 function sendName() {
-    stompClient.send(`/battleship/message/${roomId}`, {}, JSON.stringify({'message': $("#name").val()}));
+    stompClient.send(`/battleship/message/${roomId}`, {}, JSON.stringify({'content': $("#message").val()}));
 }
 
-function showGreeting(message) {
-    $("#greetings").append("<tr><td>" + message.message + "</td></tr>");
-    console.log(`message from server: ${message.message}`);
+function showChatMessage(message) {
+    $("#greetings").append("<tr><td>" + message.content + "</td></tr>");
+}
+
+function showUserStatus(message) {
+    $("#greetings").append("<tr><td>" + message.content + ": status" + "</td></tr>");
 }
 
 $(() => {

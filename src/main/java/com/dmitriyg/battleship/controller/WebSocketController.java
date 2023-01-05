@@ -9,7 +9,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.util.HtmlUtils;
 
-import com.dmitriyg.battleship.model.ChatMessage;
+import com.dmitriyg.battleship.model.MessagingData;
 
 @Controller
 public class WebSocketController {
@@ -21,9 +21,10 @@ public class WebSocketController {
 	
 
 	@MessageMapping("message/{roomId}") // client uses: "/battleship/message" to send data
-	public void messageReceiveSend(ChatMessage message, @DestinationVariable int roomId, Principal principal) {
+	public void messageReceiveSend(MessagingData message, @DestinationVariable int roomId, Principal principal) {
 		simpMessagingTemplate.convertAndSend("/room/" + roomId,
-			new ChatMessage(HtmlUtils.htmlEscape(principal.getName() + ": " + message.getMessage())));
+			new MessagingData("chat-message", HtmlUtils.htmlEscape(principal.getName() + ": " + message.getContent())));
 	}
+
 
 }
