@@ -20,7 +20,7 @@ public class UserSessionRepository {
 		activeUserSessions.put(sessionId, userSession);
 	}
 	
-	public UserSession getUserSession(String sessionId) {
+	public UserSession find(String sessionId) {
 		return activeUserSessions.get(sessionId);
 	}
 
