@@ -1,24 +1,24 @@
 package com.dmitriyg.battleship.model;
 
-public class MessagingData {
+public class MessagingData<T> {
 	
 	String type;
 
-	String content;
+	T content;
 
 	public MessagingData() {
 	}
 
-	public MessagingData(String type, String content) {
+	public MessagingData(String type, T content) {
 		this.type = type;
 		this.content = content;
 	}
 
-	public String getContent() {
+	public T getContent() {
 		return content;
 	}
 
-	public void setContent(String content) {
+	public void setContent(T content) {
 		this.content = content;
 	}
 

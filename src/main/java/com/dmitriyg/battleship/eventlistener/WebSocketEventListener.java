@@ -30,6 +30,7 @@ public class WebSocketEventListener {
 		userSessionService.add(headers);
 		webSocketUtils.alertDestination(headers);
 		webSocketUtils.updateUserList(headers);
+		webSocketUtils.sendOpponentUsername(headers);
 	}
 
 	@EventListener

@@ -11,6 +11,7 @@ import org.springframework.web.util.HtmlUtils;
 
 import com.dmitriyg.battleship.model.MessagingData;
 import com.dmitriyg.battleship.model.UserSession;
+import com.dmitriyg.battleship.service.UserService;
 import com.dmitriyg.battleship.service.UserSessionService;
 
 @Component
@@ -23,15 +24,15 @@ public class WebSocketUtils {
 	
 	public void updateUserList(SimpMessageHeaderAccessor headers) {
 		String destination; // null if messageType is disconnect
-		String userStatus;
+		String messageType;
 
 		if (headers.getMessageType() == SimpMessageType.SUBSCRIBE) {
 			destination = headers.getDestination(); 
-			userStatus = "user-status-connect";
+			messageType = "user-status-connect";
 		} else if (headers.getMessageType() == SimpMessageType.DISCONNECT) {
 			UserSession userSession = userSessionService.find(headers.getSessionId());
 			destination = userSession.getDestination();
-			userStatus = "user-status-disconnect";
+			messageType = "user-status-disconnect";
 		} else {
 			return;
 		}
@@ -39,8 +40,17 @@ public class WebSocketUtils {
 		Set<String> users = userSessionService.findUsersSubscribedToTopic(destination);
 
 		simpMessagingTemplate.convertAndSend(destination, 
-				new MessagingData(userStatus, HtmlUtils.htmlEscape("there are now (" + users.size() + ") users in room: " + destination)));
+				new MessagingData<String>(messageType, HtmlUtils.htmlEscape("there are now (" + users.size() + ") users in room: " + destination)));
 		
+	}
+	
+	public void sendOpponentUsername(SimpMessageHeaderAccessor headers) {
+		if (headers.getMessageType() == SimpMessageType.SUBSCRIBE) {
+			String destination = headers.getDestination();
+			Set<String> users = userSessionService.findUsersSubscribedToTopic(destination);
+			simpMessagingTemplate.convertAndSend(destination, 
+					new MessagingData<Set<String>>("usernames", users));
+		}
 	}
 	
 	public void alertDestination(SimpMessageHeaderAccessor headers) {
@@ -65,20 +75,9 @@ public class WebSocketUtils {
 			return;
 		}
 
-		//broadcastToTopic(username, "/topic/1", 
 		broadcastToTopic(username, destination, 
-				new MessagingData("user-status-alert", HtmlUtils.htmlEscape("---" + username + message)));
+				new MessagingData<String>("user-status-alert", HtmlUtils.htmlEscape("---" + username + message)));
 
-		/*
-		  
-		//simpMessagingTemplate.convertAndSendToUser("john", destination, 
-		simpMessagingTemplate.convertAndSendToUser("john", "/topic/1", 
-				new MessagingData("user-status-alert", HtmlUtils.htmlEscape("---" + username + message)));
-
-		simpMessagingTemplate.convertAndSend("/topic/1", 
-				new MessagingData("user-status-alert", HtmlUtils.htmlEscape("---" + username + message)));
-
-		*/
 	}
 	
 	// send message to all subscribers of a topic except the sender

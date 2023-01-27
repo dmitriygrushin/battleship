@@ -15,6 +15,7 @@ function setConnected(connected) {
         $("#conversation").show();
     } else {
         $("#conversation").hide();
+        removeOpponentUsername();
     }
     $("#messages").html("");
 }
@@ -29,15 +30,7 @@ function connect() {
         
         stompClient.subscribe(`/user/topic/${roomId}`, (message) => {
 			let parsedMessage = JSON.parse(message.body);
-			
-			if (["user-status-alert", "user-status-connect", "user-status-disconnect"].includes(parsedMessage.type)) {
-				showUserStatus(parsedMessage);
-			}
-
-			//if (parsedMessage.type == "user-status-connect") addOpponentUsername("jim");
-
-			//if (parsedMessage.type == "user-status-disconnect") removeOpponentUsername();
-			
+			if (parsedMessage.type == "user-status-alert") showUserStatus(parsedMessage);
         });
 
         stompClient.subscribe(`/topic/${roomId}`, (message) => {
@@ -47,10 +40,8 @@ function connect() {
 			if (["user-status-alert", "user-status-connect", "user-status-disconnect"].includes(parsedMessage.type)) {
 				showUserStatus(parsedMessage);
 			}
-
-			//if (parsedMessage.type == "user-status-connect") addOpponentUsername("jim");
-
-			//if (parsedMessage.type == "user-status-disconnect") removeOpponentUsername();
+			if (parsedMessage.type == "usernames") addOpponentUsername(parsedMessage);
+			if (parsedMessage.type == "user-status-disconnect") removeOpponentUsername();
         });
 
         
@@ -77,8 +68,16 @@ function showUserStatus(message) {
     $("#messages").append("<tr><td>" + message.content + ": status" + "</td></tr>");
 }
 
-function addOpponentUsername(opponent) {
-	document.getElementById("p-vs-p").innerHTML = `${username} vs ${opponent}`;	
+// from list of usernames find and add the opponent's username
+function addOpponentUsername(usernames) {
+	for (const username of usernames.content) {
+		console.log("usernames: " + username);
+		if (myUsername != username) {
+			document.getElementById("p-vs-p").innerHTML = `Opponent: ${username}`;	
+			return;	
+		}
+	}
+
 }
 
 function removeOpponentUsername() {

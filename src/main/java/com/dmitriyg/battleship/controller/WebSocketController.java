@@ -22,9 +22,9 @@ public class WebSocketController {
 	
 
 	@MessageMapping("message/{roomId}") // client uses: "/app/message" to send data
-	public void messageReceiveSend(MessagingData message, @DestinationVariable int roomId, Principal principal) {
+	public void messageReceiveSend(MessagingData<String> message, @DestinationVariable int roomId, Principal principal) {
 		simpMessagingTemplate.convertAndSend("/topic/" + roomId,
-			new MessagingData("chat-message", HtmlUtils.htmlEscape(principal.getName() + ": " + message.getContent())));
+			new MessagingData<String>("chat-message", HtmlUtils.htmlEscape(principal.getName() + ": " + message.getContent())));
 	}
 
 }
