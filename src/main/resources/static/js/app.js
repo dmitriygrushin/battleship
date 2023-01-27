@@ -13,11 +13,10 @@ function setConnected(connected) {
     $("#disconnect").prop("disabled", !connected);
     if (connected) {
         $("#conversation").show();
-    }
-    else {
+    } else {
         $("#conversation").hide();
     }
-    $("#greetings").html("");
+    $("#messages").html("");
 }
 
 function connect() {
@@ -26,11 +25,35 @@ function connect() {
     stompClient.connect({}, (frame) => {
         setConnected(true);
         console.log('Connected: ' + frame);
-        stompClient.subscribe(`/room/${roomId}`, (message) => {
+        
+        
+        stompClient.subscribe(`/user/topic/${roomId}`, (message) => {
+			let parsedMessage = JSON.parse(message.body);
+			
+			if (["user-status-alert", "user-status-connect", "user-status-disconnect"].includes(parsedMessage.type)) {
+				showUserStatus(parsedMessage);
+			}
+
+			//if (parsedMessage.type == "user-status-connect") addOpponentUsername("jim");
+
+			//if (parsedMessage.type == "user-status-disconnect") removeOpponentUsername();
+			
+        });
+
+        stompClient.subscribe(`/topic/${roomId}`, (message) => {
 			let parsedMessage = JSON.parse(message.body);
 			if (parsedMessage.type == "chat-message") showChatMessage(parsedMessage);
-			if (parsedMessage.type == "user-status") showUserStatus(parsedMessage);
+			
+			if (["user-status-alert", "user-status-connect", "user-status-disconnect"].includes(parsedMessage.type)) {
+				showUserStatus(parsedMessage);
+			}
+
+			//if (parsedMessage.type == "user-status-connect") addOpponentUsername("jim");
+
+			//if (parsedMessage.type == "user-status-disconnect") removeOpponentUsername();
         });
+
+        
     });
 }
 
@@ -43,22 +66,30 @@ function disconnect() {
 }
 
 function sendName() {
-    stompClient.send(`/battleship/message/${roomId}`, {}, JSON.stringify({'content': $("#message").val()}));
+    stompClient.send(`/app/message/${roomId}`, {}, JSON.stringify({'content': $("#message").val()}));
 }
 
 function showChatMessage(message) {
-    $("#greetings").append("<tr><td>" + message.content + "</td></tr>");
+    $("#messages").append("<tr><td>" + message.content + "</td></tr>");
 }
 
 function showUserStatus(message) {
-    $("#greetings").append("<tr><td>" + message.content + ": status" + "</td></tr>");
+    $("#messages").append("<tr><td>" + message.content + ": status" + "</td></tr>");
+}
+
+function addOpponentUsername(opponent) {
+	document.getElementById("p-vs-p").innerHTML = `${username} vs ${opponent}`;	
+}
+
+function removeOpponentUsername() {
+	document.getElementById("p-vs-p").innerHTML = `Waiting for opponent...`;	
 }
 
 $(() => {
     $("form").on('submit', (e) => {
         e.preventDefault();
     });
-    $( "#connect" ).click(() => { connect(); });
-    $( "#disconnect" ).click(() => { disconnect(); });
-    $( "#send" ).click(() => { sendName(); });
+    $("#connect").click(() => { connect(); });
+    $("#disconnect").click(() => { disconnect(); });
+    $("#send").click(() => { sendName(); });
 });

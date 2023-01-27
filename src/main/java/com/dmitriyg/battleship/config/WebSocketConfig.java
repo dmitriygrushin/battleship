@@ -13,9 +13,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	@Override
 	public void configureMessageBroker(MessageBrokerRegistry config) {
 		// where the client(Browser) will subscribe to i.e. a room | @MessageMapping("/...")
-		config.enableSimpleBroker("/room"); 
+		config.enableSimpleBroker("/topic"); 
 		// prefix where client(Browser) will send their data i.e. stompClient.send("/prefix/...", ...) | @SendTo("/prefix/...")
-		config.setApplicationDestinationPrefixes("/battleship"); 
+		config.setApplicationDestinationPrefixes("/app"); 
+		config.setUserDestinationPrefix("/user");
 	}
 
 	@Override

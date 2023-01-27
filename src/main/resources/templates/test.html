@@ -1,25 +1,23 @@
 <div th:replace="~{fragments/aboveMainRoom.html}"></div>
 
 
-<noscript><h2 style="color: #ff0000">Seems your browser doesn't support Javascript! Websocket relies on Javascript being
-    enabled. Please enable
-    Javascript and reload this page!</h2></noscript>
+<noscript><h2 style="color: #ff0000">Seems your browser doesn't support Javascript! Websocket relies on Javascript being enabled. Please enable Javascript and reload this page!</h2></noscript>
 <div id="main-content" class="container">
     <div class="row">
         <div class="col-md-6">
             <form class="form-inline">
                 <div class="form-group">
-                    <label for="connect">WebSocket connection:</label>
+                    <label for="connect">Connection:</label>
                     <button id="connect" class="btn btn-default" type="submit">Connect</button>
-                    <button id="disconnect" class="btn btn-default" type="submit" disabled="disabled">Disconnect
-                    </button>
+                    <button id="disconnect" class="btn btn-default" type="submit" disabled="disabled">Disconnect</button>
                 </div>
             </form>
+            <span id="p-vs-p">Waiting for opponent...</span>
         </div>
         <div class="col-md-6">
             <form class="form-inline">
                 <div class="form-group">
-                    <label for="message">What is your name?</label>
+                    <label for="message">Chat:</label>
                     <input type="text" id="message" class="form-control" placeholder="Your message here...">
                 </div>
                 <button id="send" class="btn btn-success" type="submit">Send</button>
@@ -31,10 +29,10 @@
             <table id="conversation" class="table table-striped">
                 <thead>
                 <tr>
-                    <th>Greetings</th>
+                    <th>Messages</th>
                 </tr>
                 </thead>
-                <tbody id="greetings">
+                <tbody id="messages">
                 </tbody>
             </table>
         </div>
