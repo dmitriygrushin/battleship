@@ -14,6 +14,11 @@ import com.dmitriyg.battleship.model.UserSession;
 @Repository
 public class UserSessionRepository {
 
+	/* TODO: 
+	 * Don't double down on the custom activeUserSessions
+	 * SimpUserRegistry already holds a list of user and their sessions 
+	 * so, this may be unnecessary. */
+	
 	private Map<String, UserSession> activeUserSessions = new ConcurrentHashMap<>();
 	
 	public void add(String sessionId, UserSession userSession) {

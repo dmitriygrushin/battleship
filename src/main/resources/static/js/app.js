@@ -27,12 +27,11 @@ function connect() {
         setConnected(true);
         console.log('Connected: ' + frame);
         
-        
         stompClient.subscribe(`/user/topic/${roomId}`, (message) => {
 			let parsedMessage = JSON.parse(message.body);
 			if (parsedMessage.type == "user-status-alert") showUserStatus(parsedMessage);
         });
-
+		
         stompClient.subscribe(`/topic/${roomId}`, (message) => {
 			let parsedMessage = JSON.parse(message.body);
 			if (parsedMessage.type == "chat-message") showChatMessage(parsedMessage);

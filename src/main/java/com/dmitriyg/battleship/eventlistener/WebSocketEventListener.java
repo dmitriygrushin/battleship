@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 
-import com.dmitriyg.battleship.service.UserService;
 import com.dmitriyg.battleship.service.UserSessionService;
 import com.dmitriyg.battleship.util.WebSocketUtils;
 

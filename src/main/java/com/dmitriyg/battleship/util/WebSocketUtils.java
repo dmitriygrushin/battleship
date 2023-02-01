@@ -31,6 +31,7 @@ public class WebSocketUtils {
 			messageType = "user-status-connect";
 		} else if (headers.getMessageType() == SimpMessageType.DISCONNECT) {
 			UserSession userSession = userSessionService.find(headers.getSessionId());
+			if (userSession == null) return;
 			destination = userSession.getDestination();
 			messageType = "user-status-disconnect";
 		} else {
@@ -63,11 +64,14 @@ public class WebSocketUtils {
 		 * Alerts need to only work on subscribe and disconnect
 		 */
 		if (headers.getMessageType() == SimpMessageType.SUBSCRIBE) {
+			System.out.println("subscribe if fired");
 			username = headers.getUser().getName();
 			destination = headers.getDestination(); // null if messageType is disconnect
 			message = " has JOINED the room!---";
 		} else if (headers.getMessageType() == SimpMessageType.DISCONNECT) {
+			System.out.println("disconnect else if fired");
 			UserSession userSession = userSessionService.find(headers.getSessionId());
+			if (userSession == null) return;
 			username = userSession.getPrincipal().getName();
 			destination = userSession.getDestination();
 			message = " has LEFT the room!---";
