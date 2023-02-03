@@ -23,6 +23,15 @@ public class WebSocketEventListener {
 	private void handleSessionConnected(SessionSubscribeEvent event) {
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(event.getMessage());
 		
+		System.out.println("-------- headers --------");
+		System.out.println(headers.toString());
+		System.out.println("SessionId: " + headers.getSessionId());
+		System.out.println("-------- headers --------");
+		
+		System.out.println("-------users subcribed sessionId: below---------------");
+		webSocketUtils.printUsersSubscribedToTopic(headers.getDestination());
+		System.out.println("-------users subcribed sessionId: above ---------------");
+		
 		// stop user destination: /user from being used because they are redundant since /topic is already being used when users join a room.
 		if (headers.getDestination().indexOf("/user") == 0) return;
 

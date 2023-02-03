@@ -17,7 +17,7 @@ public class TopicSubscriptionInterceptor implements ChannelInterceptor {
 	private UserSessionService userSessionService;
 	
     @Override
-    public Message<?> preSend(Message<?> message, MessageChannel channel){
+    public Message<?> preSend(Message<?> message, MessageChannel channel) {
     	StompHeaderAccessor header = StompHeaderAccessor.wrap(message);
     	String destination = header.getDestination();
 

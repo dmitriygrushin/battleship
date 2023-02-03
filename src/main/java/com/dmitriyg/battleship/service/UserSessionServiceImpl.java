@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.user.SimpSession;
 import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.stereotype.Service;
 
@@ -58,5 +59,18 @@ public class UserSessionServiceImpl implements UserSessionService {
 		);
 		
 		return users;
+	}
+
+	@Override
+	public Set<SimpSession> findSessionsSubscribedToTopic(String topic) {
+		Set<SimpSession> session = new HashSet<>();
+		
+		userRegistry.findSubscriptions(subscription -> 
+			subscription.getDestination().equals(topic))
+		.forEach(subscription -> 
+			session.add(subscription.getSession())
+		);
+		
+		return session;
 	}
 }

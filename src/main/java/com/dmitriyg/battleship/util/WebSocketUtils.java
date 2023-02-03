@@ -6,12 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.user.SimpSession;
+import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.HtmlUtils;
 
 import com.dmitriyg.battleship.model.MessagingData;
 import com.dmitriyg.battleship.model.UserSession;
-import com.dmitriyg.battleship.service.UserService;
 import com.dmitriyg.battleship.service.UserSessionService;
 
 @Component
@@ -21,6 +22,8 @@ public class WebSocketUtils {
 	private UserSessionService userSessionService;
 	@Autowired
 	private SimpMessagingTemplate simpMessagingTemplate; 
+	@Autowired
+	private SimpUserRegistry userRegistry;
 	
 	public void updateUserList(SimpMessageHeaderAccessor headers) {
 		String destination; // null if messageType is disconnect
@@ -64,12 +67,10 @@ public class WebSocketUtils {
 		 * Alerts need to only work on subscribe and disconnect
 		 */
 		if (headers.getMessageType() == SimpMessageType.SUBSCRIBE) {
-			System.out.println("subscribe if fired");
 			username = headers.getUser().getName();
 			destination = headers.getDestination(); // null if messageType is disconnect
 			message = " has JOINED the room!---";
 		} else if (headers.getMessageType() == SimpMessageType.DISCONNECT) {
-			System.out.println("disconnect else if fired");
 			UserSession userSession = userSessionService.find(headers.getSessionId());
 			if (userSession == null) return;
 			username = userSession.getPrincipal().getName();
@@ -80,14 +81,13 @@ public class WebSocketUtils {
 		}
 
 		broadcastToTopic(username, destination, 
-				new MessagingData<String>("user-status-alert", HtmlUtils.htmlEscape("---" + username + message)));
+				new MessagingData<>("user-status-alert", HtmlUtils.htmlEscape("---" + username + message)));
 
 	}
 	
 	// send message to all subscribers of a topic except the sender
-	public void broadcastToTopic(String broadcaster, String destination, MessagingData message) {
+	public void broadcastToTopic(String broadcaster, String destination, MessagingData<String> message) {
 		Set<String> usernames =  userSessionService.findUsersSubscribedToTopic(destination);
-		System.out.println("broachcastToTopic.destination: " + destination + ": " + message.getContent());
 
 		// remove the user that's broadcasting the message
 		usernames.remove(broadcaster);
@@ -97,6 +97,28 @@ public class WebSocketUtils {
 		}
 		
 	}
+	
+	// check if both users subscribed to the topic are ready
+	public boolean isTopicReady(String destination) {
+		Set<SimpSession> sessions = userSessionService.findSessionsSubscribedToTopic(destination);
+		
+		if (sessions.size() < 2) return false;
+		
+		for (SimpSession session : sessions) {
+			if (!userSessionService.find(session.getId()).isReady()) return false;
+		}
+
+		return true;
+	}
+	
+	public void printUsersSubscribedToTopic(String topic) {
+		userRegistry.findSubscriptions(subscription -> 
+			subscription.getDestination().equals(topic))
+		.forEach(subscription -> 
+			System.out.println(subscription.getSession().getId())
+		);
+	}
+
 
 
 }

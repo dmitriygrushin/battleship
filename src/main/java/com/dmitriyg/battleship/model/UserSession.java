@@ -11,6 +11,7 @@ public class UserSession {
 
 	private Principal principal;
 	private String destination;
+	private boolean ready = false;
 
 	public UserSession() {
 	}
@@ -34,6 +35,14 @@ public class UserSession {
 
 	public void setDestination(String destination) {
 		this.destination = destination;
+	}
+
+	public boolean isReady() {
+		return ready;
+	}
+
+	public void setReady(boolean ready) {
+		this.ready = ready;
 	} 
 	
 }

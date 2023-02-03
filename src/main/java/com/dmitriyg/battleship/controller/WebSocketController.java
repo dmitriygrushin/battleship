@@ -4,27 +4,46 @@ import java.security.Principal;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.util.HtmlUtils;
 
 import com.dmitriyg.battleship.model.MessagingData;
+import com.dmitriyg.battleship.service.UserSessionService;
+import com.dmitriyg.battleship.util.WebSocketUtils;
 
 @Controller
 public class WebSocketController {
 	
 	@Autowired
-	// used instead of @SendTo so that I could have dynamic rooms 
-	// (@SendTo("/topic/tempRoom") // where client subscribes to)
 	private SimpMessagingTemplate simpMessagingTemplate; 
 	
+	@Autowired
+	private UserSessionService userSessionService;
+	
+	@Autowired
+	private WebSocketUtils webSocketUtils;
 
 	@MessageMapping("message/{roomId}") // client uses: "/app/message" to send data
 	public void messageReceiveSend(MessagingData<String> message, @DestinationVariable int roomId, Principal principal) {
 		simpMessagingTemplate.convertAndSend("/topic/" + roomId,
 			new MessagingData<String>("chat-message", HtmlUtils.htmlEscape(principal.getName() + ": " + message.getContent())));
+	}
+
+	@MessageMapping("ready/{roomId}") 
+	public void clientReady(@Header("simpSessionId") String sessionId, MessagingData<String> message, @DestinationVariable int roomId, Principal principal) {
+		// update the user's isReady field
+		userSessionService.find(sessionId).setReady(true);
+		simpMessagingTemplate.convertAndSendToUser(principal.getName(), "/topic/" + roomId, 
+				new MessagingData<String>("ready-success", "ready successful"));
+
+		if (webSocketUtils.isTopicReady("/topic/" + roomId)) {
+			System.out.println("Room is ready!");
+			simpMessagingTemplate.convertAndSend("/topic/" + roomId,
+				new MessagingData<String>("ready-room-success", "Room is ready!"));
+		}
 	}
 
 }

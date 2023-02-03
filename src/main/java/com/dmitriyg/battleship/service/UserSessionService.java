@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.user.SimpSession;
 
 import com.dmitriyg.battleship.model.UserSession;
 
@@ -15,4 +16,5 @@ public interface UserSessionService {
 	Map<String, UserSession> getActiveUserSessions();
 	void setActiveUserSessions(Map<String, UserSession> activeUserSessions);
 	Set<String> findUsersSubscribedToTopic(String topic);
+	Set<SimpSession> findSessionsSubscribedToTopic(String topic);
 }
