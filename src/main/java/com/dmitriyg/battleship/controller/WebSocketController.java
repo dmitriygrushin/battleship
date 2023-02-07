@@ -29,7 +29,7 @@ public class WebSocketController {
 	@MessageMapping("message/{roomId}") // client uses: "/app/message" to send data
 	public void messageReceiveSend(MessagingData<String> message, @DestinationVariable int roomId, Principal principal) {
 		simpMessagingTemplate.convertAndSend("/topic/" + roomId,
-			new MessagingData<String>("chat-message", HtmlUtils.htmlEscape(principal.getName() + ": " + message.getContent())));
+			new MessagingData<>("chat-message", HtmlUtils.htmlEscape(principal.getName() + ": " + message.getContent())));
 	}
 
 	@MessageMapping("ready/{roomId}") 
@@ -37,13 +37,50 @@ public class WebSocketController {
 		// update the user's isReady field
 		userSessionService.find(sessionId).setReady(true);
 		simpMessagingTemplate.convertAndSendToUser(principal.getName(), "/topic/" + roomId, 
-				new MessagingData<String>("ready-success", "ready successful"));
+				new MessagingData<>("ready-success", "ready successful"));
 
 		if (webSocketUtils.isTopicReady("/topic/" + roomId)) {
-			System.out.println("Room is ready!");
 			simpMessagingTemplate.convertAndSend("/topic/" + roomId,
-				new MessagingData<String>("ready-room-success", "Room is ready!"));
+				new MessagingData<>("ready-room-success", "Room is ready!"));
+
+			// Game Loop - #1
+			// for the sake of simplicity the first user to get ready will go first
+			webSocketUtils.broadcastToTopic(principal.getName(), "/topic/" + roomId, 
+					new MessagingData<>("ready-room-battle", ""));
+			/*
+			simpMessagingTemplate.convertAndSend("/topic/" + roomId,
+				new MessagingData<String>("ready-room-battle", principal.getName()));
+			*/
+
 		}
 	}
+	
+	// Game Loop - #3
+	@MessageMapping("coordinates/{roomId}")
+	public void receiveCoordinates(MessagingData<String> message, @DestinationVariable int roomId, Principal principal) {
+		webSocketUtils.broadcastToTopic(principal.getName(), "/topic/" + roomId, 
+				new MessagingData<>("battle-coordinates", message.getContent()));
+	}
+
+	// Game Loop - #5
+	@MessageMapping("hit/{roomId}")
+	public void hitResponse(MessagingData<String> message, @DestinationVariable int roomId, Principal principal) {
+		webSocketUtils.broadcastToTopic(principal.getName(), "/topic/" + roomId, 
+				new MessagingData<>("battle-coordinates-hit", message.getContent()));
+	}
+
+	@MessageMapping("miss/{roomId}")
+	public void missResponse(MessagingData<String> message, @DestinationVariable int roomId, Principal principal) {
+		webSocketUtils.broadcastToTopic(principal.getName(), "/topic/" + roomId, 
+				new MessagingData<>("battle-coordinates-miss", message.getContent()));
+	}
+
+	@MessageMapping("finish/{roomId}")
+	public void finishResponse(MessagingData<String> message, @DestinationVariable int roomId, Principal principal) {
+		webSocketUtils.broadcastToTopic(principal.getName(), "/topic/" + roomId, 
+				new MessagingData<>("battle-finish", message.getContent()));
+	}
+	
+	
 
 }

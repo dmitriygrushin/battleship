@@ -86,11 +86,11 @@ public class WebSocketUtils {
 	}
 	
 	// send message to all subscribers of a topic except the sender
-	public void broadcastToTopic(String broadcaster, String destination, MessagingData<String> message) {
+	public void broadcastToTopic(String broadcasterUsername, String destination, MessagingData<String> message) {
 		Set<String> usernames =  userSessionService.findUsersSubscribedToTopic(destination);
 
 		// remove the user that's broadcasting the message
-		usernames.remove(broadcaster);
+		usernames.remove(broadcasterUsername);
 		
 		for (String username : usernames) {
 			simpMessagingTemplate.convertAndSendToUser(username, destination, message);
@@ -118,7 +118,5 @@ public class WebSocketUtils {
 			System.out.println(subscription.getSession().getId())
 		);
 	}
-
-
 
 }
