@@ -1,5 +1,6 @@
 let stompClient = null;
-let shipCount = 2;
+let shipCount = 2; 
+
 
 // Board: |0 - ocean|, |1 - hit|, |2 - miss|,  |3 - ship|
 
@@ -19,7 +20,7 @@ let opponentBoard =
 
 
 let myBoard = 
-//col:           A,B,C,D,E,F,G,H,I,J    row:
+//cols           A,B,C,D,E,F,G,H,I,J    row:
 			[	[0,0,0,0,0,0,0,0,0,0],  // 1 
 				[0,0,0,0,0,0,0,0,0,0],  // 2 
 				[0,0,0,0,0,0,0,0,0,0],  // 3 
@@ -77,30 +78,29 @@ function connect() {
 				alert("you received battle coordinates");
 				// handle coordinates and say hit or miss
 				handleBattleCoordinates(parsedMessage.content);
-				drawBoard("OPPONENT REFERENCE BOARD", opponentBoard);
-				drawBoard("YOUR BOARD", myBoard);
+				drawBoard("opponent-board", opponentBoard);
+				drawBoard("my-board", myBoard);
 			}
 			
 			// Game Loop - #6 - Almost end. End is when 1 user's ships are all gone
 			if (parsedMessage.type == "battle-coordinates-hit") {
 				updateOpponentBoard(parsedMessage.content, 1);
 				console.log(`${parsedMessage.content} was a HIT`);
-				drawBoard("OPPONENT REFERENCE BOARD", opponentBoard);
-				drawBoard("YOUR BOARD", myBoard);
+				drawBoard("opponent-board", opponentBoard);
+				drawBoard("my-board", myBoard);
 			}
 			
 			if (parsedMessage.type == "battle-coordinates-miss") {
 				updateOpponentBoard(parsedMessage.content, 2);
 				console.log(`${parsedMessage.content} was a MISS`);
-				drawBoard("OPPONENT REFERENCE BOARD", opponentBoard);
-				drawBoard("YOUR BOARD", myBoard);
+				drawBoard("opponent-board", opponentBoard);
+				drawBoard("my-board", myBoard);
 			}
 			
+			// Game Loop - END
 			if (parsedMessage.type == "battle-finish") {
 				alert("You won!");
-			
 			  	setTimeout(() => { location.reload(); }, 5000);
-				
 			}
 			
 			
@@ -122,8 +122,8 @@ function connect() {
 
 			if (parsedMessage.type == "ready-room-success") {
 				//alert("The room is ready!");
-				drawBoard("OPPONENT REFERENCE BOARD", opponentBoard);
-				drawBoard("YOUR BOARD", myBoard);
+				drawBoard("opponent-board", opponentBoard);
+				drawBoard("my-board", myBoard);
 			}
         });
     });
@@ -169,8 +169,17 @@ function sendReadySignal() {
     stompClient.send(`/app/ready/${roomId}`, {}, JSON.stringify({}));
 }
 
+
+/*
 function broadcastCoordinates() {
     stompClient.send(`/app/coordinates/${roomId}`, {}, JSON.stringify({'content': $("#coordinates").val()}));
+	$("#broadcast-coordinates").prop("disabled", true); 
+}*/
+
+
+function broadcastCoordinates(coordinates) {
+	console.log("coordinates send: " + coordinates);
+    stompClient.send(`/app/coordinates/${roomId}`, {}, JSON.stringify({'content': coordinates}));
 	$("#broadcast-coordinates").prop("disabled", true); 
 }
 
@@ -183,7 +192,40 @@ function drawBoard(name, array) {
 		console.log(`|${i+1}|${array[i]}`);
 	}
 	console.log(`  |A|B|C|D|E|F|G|H|I|J|`);
-	console.log("---------------------")
+	console.log("---------------------");
+
+	$(`#game-board-${name}`).empty();
+	let gameBoard = document.getElementById(`game-board-${name}`);
+	let h1 = document.createElement("h1");
+	h1.innerHTML = name;
+	gameBoard.appendChild(h1);
+	
+	for (let i = 1; i <= 10; i++) {
+		let row = document.createElement("div");
+		row.classList.add("row");
+		row.classList.add("w-75");
+		for (let j = 1; j <= 10; j++) {
+			let col = document.createElement("div");
+			col.classList.add("col-1");
+			col.classList.add(`${name}-coords`);
+			col.classList.add("border");
+			col.classList.add("border-primary");
+			col.innerHTML = array[i - 1][j - 1];
+			col.setAttribute('id', `${i},${String.fromCharCode(j + 64)}`)
+			row.appendChild(col);
+		}	
+		gameBoard.appendChild(row);
+	}
+	if (name == "opponent-board") {
+		const collections = document.getElementsByClassName("opponent-board-coords");
+		console.log("collection.innerHTML");
+		for (const element of collections) {
+			element.addEventListener("click", () => {
+				broadcastCoordinates(element.getAttribute("id"))
+			});
+		}
+	}
+	
 }
 
 // Game Loop - #4
@@ -229,6 +271,6 @@ $(() => {
     $("#disconnect").click(() => { disconnect(); });
     $("#send").click(() => { sendName(); });
     $("#ready-button").click(() => { sendReadySignal(); });
-    $("#broadcast-coordinates").click(() => { broadcastCoordinates(); });
+    //$("#broadcast-coordinates").click(() => { broadcastCoordinates(); });
 
 });

@@ -75,6 +75,7 @@ public class WebSocketController {
 				new MessagingData<>("battle-coordinates-miss", message.getContent()));
 	}
 
+	// Game Loop - END
 	@MessageMapping("finish/{roomId}")
 	public void finishResponse(MessagingData<String> message, @DestinationVariable int roomId, Principal principal) {
 		webSocketUtils.broadcastToTopic(principal.getName(), "/topic/" + roomId, 
