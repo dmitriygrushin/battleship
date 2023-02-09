@@ -222,7 +222,15 @@ function drawBoard(name, array) {
 			col.innerHTML = `${i}`;
 			if (j != 0) {
 				col.classList.add(`${name}-coords`);
-				col.innerHTML = array[i - 1][j - 1];
+				if (array[i - 1][j - 1] == 1) {
+					col.innerHTML = "💥";
+				} else if (array[i - 1][j - 1] == 2) {
+					col.innerHTML = '❌';
+				} else if (array[i - 1][j - 1] == 3) {
+					col.innerHTML = '🚢';
+				} else {
+					col.innerHTML = '🌊';
+				}
 				col.setAttribute('id', `${i},${String.fromCharCode(j + 64)}`)
 			}
 			
