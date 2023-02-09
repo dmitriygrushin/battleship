@@ -41,7 +41,8 @@ let roomId = (() => {
 if (!roomId) alert("You don't have a room number!");
 
 $("#ready-button").prop("disabled", true); 
-$("#broadcast-coordinates").prop("disabled", true); 
+$("#whose-turn").prop("disabled", true); 
+let isYourTurn = false;
 
 function setConnected(connected) {
     $("#connect").prop("disabled", connected);
@@ -70,7 +71,8 @@ function connect() {
 			// Game Loop - #2
 			if (parsedMessage.type == "ready-room-battle") {
 				alert("Your turn");
-				$("#broadcast-coordinates").prop("disabled", false); 
+				$("#whose-turn").prop("disabled", false); 
+				isYourTurn = true;
 			}
 			
 			// Game Loop - #4
@@ -173,14 +175,19 @@ function sendReadySignal() {
 /*
 function broadcastCoordinates() {
     stompClient.send(`/app/coordinates/${roomId}`, {}, JSON.stringify({'content': $("#coordinates").val()}));
-	$("#broadcast-coordinates").prop("disabled", true); 
+	$("#whose-turn").prop("disabled", true); 
 }*/
 
 
 function broadcastCoordinates(coordinates) {
-	console.log("coordinates send: " + coordinates);
-    stompClient.send(`/app/coordinates/${roomId}`, {}, JSON.stringify({'content': coordinates}));
-	$("#broadcast-coordinates").prop("disabled", true); 
+	if (isYourTurn) {
+		console.log("coordinates send: " + coordinates);
+		stompClient.send(`/app/coordinates/${roomId}`, {}, JSON.stringify({'content': coordinates}));
+		$("#whose-turn").prop("disabled", true); 
+		isYourTurn = false;
+	} else {
+		alert("ITS NOT YOUR TURN YET!");
+	}
 }
 
 function drawBoard(name, array) {
@@ -216,6 +223,12 @@ function drawBoard(name, array) {
 		}	
 		gameBoard.appendChild(row);
 	}
+	
+	isAllowedToClickBoard(name);
+	
+}
+
+function isAllowedToClickBoard(name) {
 	if (name == "opponent-board") {
 		const collections = document.getElementsByClassName("opponent-board-coords");
 		console.log("collection.innerHTML");
@@ -225,7 +238,6 @@ function drawBoard(name, array) {
 			});
 		}
 	}
-	
 }
 
 // Game Loop - #4
@@ -239,7 +251,8 @@ function handleBattleCoordinates(coordinates) {
 	// broadcasta hit(1)/miss(2)
 	if (myBoard[row - 1][col - 1] == 3) {
 		stompClient.send(`/app/hit/${roomId}`, {}, JSON.stringify({'content': coordinates}));
-		$("#broadcast-coordinates").prop("disabled", false); 
+		$("#whose-turn").prop("disabled", false); 
+		isYourTurn = true;
 		myBoard[row - 1][col - 1] = 1;
 
 		--shipCount;
@@ -250,7 +263,8 @@ function handleBattleCoordinates(coordinates) {
 		}
 	} else {
 		stompClient.send(`/app/miss/${roomId}`, {}, JSON.stringify({'content': coordinates}));
-		$("#broadcast-coordinates").prop("disabled", false); 
+		$("#whose-turn").prop("disabled", false); 
+		isYourTurn = true;
 		myBoard[row - 1][col - 1] = 2;
 	}
 }
@@ -271,6 +285,4 @@ $(() => {
     $("#disconnect").click(() => { disconnect(); });
     $("#send").click(() => { sendName(); });
     $("#ready-button").click(() => { sendReadySignal(); });
-    //$("#broadcast-coordinates").click(() => { broadcastCoordinates(); });
-
 });

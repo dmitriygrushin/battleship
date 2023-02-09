@@ -13,18 +13,21 @@
 	<script th:inline="javascript">
 		let myUsername = [[${#authentication.getPrincipal().getUsername()}]];
 	</script>
-
+	
 	<script src="/webjars/jquery/jquery.min.js"></script>
 
 	<!-- Web Socket -->	
 	<script src="/webjars/sockjs-client/sockjs.min.js"></script>
 	<script src="/webjars/stomp-websocket/stomp.min.js"></script>
 	
-	<!-- Bootstrap -->	
+	<!-- Bootstrap & CSS -->	
+  	<link rel="stylesheet" href="/css/room.css">
+  	<link rel="stylesheet" href="/css/alert.css">
   	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5/dist/superhero/bootstrap.min.css">
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
 
 	<script src="/js/app.js" defer></script>
+	<script src="/js/alert.js" defer></script>
 </head>
 
 <body class="d-flex flex-column min-vh-100">

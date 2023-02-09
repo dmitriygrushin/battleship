@@ -2,46 +2,45 @@
 
 
 <noscript><h2 style="color: #ff0000">Seems your browser doesn't support Javascript! Websocket relies on Javascript being enabled. Please enable Javascript and reload this page!</h2></noscript>
-<div id="main-content" class="container">
-    <div class="row">
-        <div class="col-md-6">
-            <form class="form-inline">
-                <div class="form-group">
-                    <label for="connect">Connection:</label>
-                    <button id="connect" class="btn btn-default" type="submit">Connect</button>
-                    <button id="disconnect" class="btn btn-default" type="submit" disabled="disabled">Disconnect</button>
-                </div>
-            </form>
-            <span id="p-vs-p">Waiting for opponent...</span>
-            <button id="ready-button" class="btn btn-info">READY</button>
-        </div>
-        <div class="col-md-6">
-            <form class="form-inline">
-                <div class="form-group">
-                    <label for="coordinates">Coordinates:</label>
-                    <input type="text" id="coordinates" name="coordinates"class="form-control" placeholder="1,A">
-                </div>
-                <button id="broadcast-coordinates" class="btn btn-success" type="submit">Send Coordinates</button>
-            </form>
-        </div>
-    </div>
-    
-    
 
 
-	<div class="col-md-8 offset-md-2">
-		<div id="game-board-opponent-board" class="container"></div>
-		<div id="game-board-my-board" class="container"></div>
+<div class="row">
+
+	<div class="col-sm-1">
+		<div>
+		</div>
 	</div>
-    	
 
+	<div class="col-sm-11"> 
+		<div id="main-content" class="container">
+			<div class="row">
+				<div class="col-md-6">
+					<form class="form-inline">
+						<div class="form-group">
+							<div>
+								<label for="connect">Connection Status:</label>
+							</div>
+							<button id="connect" class="btn btn-success" type="submit">Connect</button>
+							<button id="disconnect" class="btn btn-danger" type="submit" disabled="disabled">Disconnect</button>
+						</div>
+					</form>
+					<div id="p-vs-p">Waiting for opponent...</div>
+					<button id="ready-button" class="btn btn-info">GET READY</button>
+					<!-- button trigger modal -->
+					<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+						Chat
+					</button>
+					<button type="button" id="whose-turn" class="btn btn-warning">Your Turn</button>
+				</div>
+			</div>
 
+			<div class="col-md-8 offset-md-2">
+				<div id="game-board-opponent-board" class="container"></div>
+				<div id="game-board-my-board" class="container"></div>
+			</div>
+		</div>
+	</div>
 </div>
-
-<!-- Button trigger modal -->
-<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-	Show Chat
-</button>
 
 <!-- Modal -->
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
