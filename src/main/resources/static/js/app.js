@@ -70,14 +70,12 @@ function connect() {
 
 			// Game Loop - #2
 			if (parsedMessage.type == "ready-room-battle") {
-				alert("Your turn");
 				$("#whose-turn").prop("disabled", false); 
 				isYourTurn = true;
 			}
 			
 			// Game Loop - #4
 			if (parsedMessage.type == "battle-coordinates") {
-				alert("you received battle coordinates");
 				// handle coordinates and say hit or miss
 				handleBattleCoordinates(parsedMessage.content);
 				drawBoard("opponent-board", opponentBoard);
@@ -191,34 +189,43 @@ function broadcastCoordinates(coordinates) {
 }
 
 function drawBoard(name, array) {
-	console.log("--------------------")
-	console.log(name)
-	console.log("--------------------")
-	for (let i = 0; i < 10; i++) {
-		//let letter = String.fromCharCode(i+1 + 64);
-		console.log(`|${i+1}|${array[i]}`);
-	}
-	console.log(`  |A|B|C|D|E|F|G|H|I|J|`);
-	console.log("---------------------");
-
 	$(`#game-board-${name}`).empty();
 	let gameBoard = document.getElementById(`game-board-${name}`);
 	let h1 = document.createElement("h1");
 	h1.innerHTML = name;
 	gameBoard.appendChild(h1);
+
+	// set up letter coordinates A - J
+	let row = document.createElement("div");
+	row.classList.add("row");
+	row.classList.add("w-75");
+	for (let j = 0; j <= 10; j++) {
+		let col = document.createElement("div");
+		col.classList.add("col-1");
+		col.classList.add("border");
+		col.classList.add("border-primary");
+		col.innerHTML = `${String.fromCharCode(j + 64)}`;
+		if (j == 0) col.innerHTML = "";
+		row.appendChild(col);
+	}	
+	gameBoard.appendChild(row);
 	
 	for (let i = 1; i <= 10; i++) {
 		let row = document.createElement("div");
 		row.classList.add("row");
 		row.classList.add("w-75");
-		for (let j = 1; j <= 10; j++) {
+		for (let j = 0; j <= 10; j++) {
 			let col = document.createElement("div");
 			col.classList.add("col-1");
-			col.classList.add(`${name}-coords`);
 			col.classList.add("border");
 			col.classList.add("border-primary");
-			col.innerHTML = array[i - 1][j - 1];
-			col.setAttribute('id', `${i},${String.fromCharCode(j + 64)}`)
+			col.innerHTML = `${i}`;
+			if (j != 0) {
+				col.classList.add(`${name}-coords`);
+				col.innerHTML = array[i - 1][j - 1];
+				col.setAttribute('id', `${i},${String.fromCharCode(j + 64)}`)
+			}
+			
 			row.appendChild(col);
 		}	
 		gameBoard.appendChild(row);
