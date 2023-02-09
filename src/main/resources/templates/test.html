@@ -24,28 +24,6 @@
                 <button id="broadcast-coordinates" class="btn btn-success" type="submit">Send Coordinates</button>
             </form>
         </div>
-        <div class="col-md-6">
-            <form class="form-inline">
-                <div class="form-group">
-                    <label for="message">Chat:</label>
-                    <input type="text" id="message" class="form-control" placeholder="Your message here...">
-                </div>
-                <button id="send" class="btn btn-success" type="submit">Send</button>
-            </form>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-12">
-            <table id="conversation" class="table table-striped">
-                <thead>
-                <tr>
-                    <th>Messages</th>
-                </tr>
-                </thead>
-                <tbody id="messages">
-                </tbody>
-            </table>
-        </div>
     </div>
     
     
@@ -58,6 +36,50 @@
     	
 
 
+</div>
+
+<!-- Button trigger modal -->
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+	Show Chat
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+      <!--  -->
+        <div class="col-md-6">
+            <form class="form-inline">
+                <div class="form-group">
+                    <label for="message">Chat:</label>
+                    <input type="text" id="message" class="form-control" placeholder="Your message here...">
+                </div>
+                <button id="send" class="btn btn-success" type="submit">Send</button>
+            </form>
+        </div>
+      
+		<div class="row">
+			<div class="col-md-12">
+				<table id="conversation" class="table table-striped">
+					<thead>
+					<tr>
+						<th>Messages</th>
+					</tr>
+					</thead>
+					<tbody id="messages">
+					</tbody>
+				</table>
+			</div>
+		</div>
+      <!--  -->
+      </div>
+    </div>
+  </div>
 </div>
 
 <div th:replace="~{fragments/belowMain.html}"></div>
