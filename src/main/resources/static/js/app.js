@@ -141,6 +141,7 @@ function disconnect() {
     }
     setConnected(false);
     console.log("Disconnected");
+	location.reload();
 }
 
 function sendName() {
