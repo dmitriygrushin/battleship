@@ -5,6 +5,7 @@ let hasOpponent = false;
 let roomIsReady = false;
 
 
+
 // Board: |0 - ocean|, |1 - hit|, |2 - miss|,  |3 - ship|
 
 // You don't get the actual opponents board. This is more of a reference board
@@ -402,4 +403,8 @@ $(() => {
     $("#disconnect").click(() => { disconnect(); });
     $("#send").click(() => { sendName(); });
     $("#ready-button").click(() => { sendReadySignal(); });
+	$("#copy-room-link-btn").click((e) => { 
+		e.preventDefault();
+		navigator.clipboard.writeText(`${window.location.href}`);
+	});
 });
