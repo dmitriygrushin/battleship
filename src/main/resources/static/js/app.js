@@ -188,10 +188,6 @@ function broadcastCoordinates(coordinates) {
 }
 
 function setUpMyCoordinates(coordinates) {
-	if (shipCount == maxShipCount && hasOpponent){
-		$("#ready-button").prop("disabled", false);
-	}
-
 	if (shipCount < maxShipCount) {
 		const row = Number(coordinates.split(",")[0]);
 		const col = Number(coordinates.split(",")[1].charCodeAt(0) - 64); // change from letter to number
@@ -205,6 +201,10 @@ function setUpMyCoordinates(coordinates) {
 		}	
 	} else {
 		alert("That's enough ships!");
+	}
+
+	if (shipCount == maxShipCount && hasOpponent){
+		$("#ready-button").prop("disabled", false);
 	}
 }
 
