@@ -2,3 +2,7 @@
 .opponent-board-coords:hover {
 	background-color: yellow;
 }
+
+.prep-board-coords:hover {
+	background-color: green;
+}

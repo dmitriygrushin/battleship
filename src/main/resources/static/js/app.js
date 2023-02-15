@@ -1,5 +1,7 @@
 let stompClient = null;
-let shipCount = 2; 
+let shipCount = 0; 
+const maxShipCount = 3;
+let hasOpponent = false;
 
 
 // Board: |0 - ocean|, |1 - hit|, |2 - miss|,  |3 - ship|
@@ -25,7 +27,7 @@ let myBoard =
 				[0,0,0,0,0,0,0,0,0,0],  // 2 
 				[0,0,0,0,0,0,0,0,0,0],  // 3 
 				[0,0,0,0,0,0,0,0,0,0],  // 4 
-				[0,0,0,0,3,3,0,0,0,0],  // 5 
+				[0,0,0,0,0,0,0,0,0,0],  // 5 
 				[0,0,0,0,0,0,0,0,0,0],  // 6 
 				[0,0,0,0,0,0,0,0,0,0],  // 7 
 				[0,0,0,0,0,0,0,0,0,0],  // 8  
@@ -62,6 +64,8 @@ function connect() {
     stompClient.connect({}, (frame) => {
         setConnected(true);
         console.log('Connected: ' + frame);
+        
+        drawPrepBoard();
         
         stompClient.subscribe(`/user/topic/${roomId}`, (message) => {
 			let parsedMessage = JSON.parse(message.body);
@@ -120,8 +124,10 @@ function connect() {
 
 			if (parsedMessage.type == "user-status-disconnect") removeOpponentUsername();
 
+			
+			// Game Loop - #0 - Room is ready
 			if (parsedMessage.type == "ready-room-success") {
-				//alert("The room is ready!");
+				$('#game-board-prep-board').remove();
 				drawBoard("opponent-board", opponentBoard);
 				drawBoard("my-board", myBoard);
 			}
@@ -155,7 +161,8 @@ function addOpponentUsername(usernames) {
 		console.log("usernames: " + username);
 		if (myUsername != username) {
 			document.getElementById("p-vs-p").innerHTML = `Opponent: ${username}`;	
-			$("#ready-button").prop("disabled", false); 
+			if (shipCount == maxShipCount) $("#ready-button").prop("disabled", false); 
+			hasOpponent = true;
 			return;	
 		}
 	}
@@ -169,14 +176,6 @@ function sendReadySignal() {
     stompClient.send(`/app/ready/${roomId}`, {}, JSON.stringify({}));
 }
 
-
-/*
-function broadcastCoordinates() {
-    stompClient.send(`/app/coordinates/${roomId}`, {}, JSON.stringify({'content': $("#coordinates").val()}));
-	$("#whose-turn").prop("disabled", true); 
-}*/
-
-
 function broadcastCoordinates(coordinates) {
 	if (isYourTurn) {
 		console.log("coordinates send: " + coordinates);
@@ -186,6 +185,83 @@ function broadcastCoordinates(coordinates) {
 	} else {
 		alert("ITS NOT YOUR TURN YET!");
 	}
+}
+
+function setUpMyCoordinates(coordinates) {
+	if (shipCount == maxShipCount && hasOpponent){
+		$("#ready-button").prop("disabled", false);
+	}
+
+	if (shipCount < maxShipCount) {
+		const row = Number(coordinates.split(",")[0]);
+		const col = Number(coordinates.split(",")[1].charCodeAt(0) - 64); // change from letter to number
+
+		// check if a ship is not in those coordinates already
+		if (myBoard[row - 1][col - 1] == 0) {
+			myBoard[row - 1][col - 1] = 3;
+		
+			drawPrepBoard();
+			++shipCount;
+		}	
+	} else {
+		alert("That's enough ships!");
+	}
+}
+
+function drawPrepBoard() {
+	let name = "prep-board";
+	let array = myBoard;
+	$(`#game-board-${name}`).empty();
+	let gameBoard = document.getElementById(`game-board-${name}`);
+	let h1 = document.createElement("h1");
+	h1.innerHTML = name;
+	gameBoard.appendChild(h1);
+
+	// set up letter coordinates A - J
+	let row = document.createElement("div");
+	row.classList.add("row");
+	row.classList.add("w-75");
+	for (let j = 0; j <= 10; j++) {
+		let col = document.createElement("div");
+		col.classList.add("col-1");
+		col.classList.add("border");
+		col.classList.add("border-primary");
+		col.innerHTML = `${String.fromCharCode(j + 64)}`;
+		if (j == 0) col.innerHTML = "";
+		row.appendChild(col);
+	}	
+	gameBoard.appendChild(row);
+	
+	for (let i = 1; i <= 10; i++) {
+		let row = document.createElement("div");
+		row.classList.add("row");
+		row.classList.add("w-75");
+		for (let j = 0; j <= 10; j++) {
+			let col = document.createElement("div");
+			col.classList.add("col-1");
+			col.classList.add("border");
+			col.classList.add("border-primary");
+			col.innerHTML = `${i}`;
+			if (j != 0) {
+				col.classList.add(`${name}-coords`);
+				if (array[i - 1][j - 1] == 1) {
+					col.innerHTML = "💥";
+				} else if (array[i - 1][j - 1] == 2) {
+					col.innerHTML = '❌';
+				} else if (array[i - 1][j - 1] == 3) {
+					col.innerHTML = '🚢';
+				} else {
+					col.innerHTML = '🌊';
+				}
+				col.setAttribute('id', `${i},${String.fromCharCode(j + 64)}`)
+			}
+			
+			row.appendChild(col);
+		}	
+		gameBoard.appendChild(row);
+	}
+	
+	isAllowedToClickBoard(name);
 }
 
 function drawBoard(name, array) {
@@ -246,14 +322,23 @@ function drawBoard(name, array) {
 function isAllowedToClickBoard(name) {
 	if (name == "opponent-board") {
 		const collections = document.getElementsByClassName("opponent-board-coords");
-		console.log("collection.innerHTML");
 		for (const element of collections) {
 			element.addEventListener("click", () => {
 				broadcastCoordinates(element.getAttribute("id"))
 			});
 		}
 	}
+	
+	if (name == "prep-board") {
+		const collections = document.getElementsByClassName("prep-board-coords");
+		for (const element of collections) {
+			element.addEventListener("click", () => {
+				setUpMyCoordinates(element.getAttribute("id"))
+			});
+		}
+	}
 }
+
 
 // Game Loop - #4
 function handleBattleCoordinates(coordinates) {
