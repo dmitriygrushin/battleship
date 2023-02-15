@@ -11,8 +11,8 @@ public class BasicController {
 		return "home";
 	}
 
-	@GetMapping("/test")
+	@GetMapping("/room")
 	public String test() {
-		return "test";
+		return "room";
 	}
 }

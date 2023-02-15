@@ -62,10 +62,7 @@ public class WebSocketUtils {
 		String destination; // null if messageType is disconnect
 		String message;
 		
-		/* TODO: Fix Ugly if else return. You don't need perfection you need to move forward.
-		 * Works for now to not get caught up in the perfectionism
-		 * Alerts need to only work on subscribe and disconnect
-		 */
+		// Alerts need to only work on subscribe and disconnect 
 		if (headers.getMessageType() == SimpMessageType.SUBSCRIBE) {
 			username = headers.getUser().getName();
 			destination = headers.getDestination(); // null if messageType is disconnect

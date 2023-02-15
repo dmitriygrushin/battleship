@@ -1,6 +1,19 @@
 <div th:replace="~{fragments/aboveMain.html}"></div>
 
+<div class="container">
+	<div class="row">
+		<div class="col text-center">
+				<h1>Welcome to Battleship</h1>
+				<h2>Join Room using a link or click below to create your own room</h2>
 
-<a href="/test?roomId=1">Room#1</a>
+				<div sec:authorize="isAuthenticated()">
+					<button id="create-room-btn" type="button" class="btn btn-primary btn-lg">Create Room</button>
+				</div>
+				<div sec:authorize="isAnonymous()">
+					<a class="btn btn-primary" th:href="@{/login}">Please Login to create/join room</a>
+				</div>
+		</div>
+	</div>
+</div>
 
 <div th:replace="~{fragments/belowMain.html}"></div>
