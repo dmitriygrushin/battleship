@@ -188,13 +188,19 @@ function sendReadySignal() {
 }
 
 function broadcastCoordinates(coordinates) {
-	if (isYourTurn) {
+	const row = Number(coordinates.split(",")[0]);
+	const col = Number(coordinates.split(",")[1].charCodeAt(0) - 64); // change from letter to number
+	
+	// make sure that its the user's turn and that the coordinates being sent are not already a hit/miss
+	if (isYourTurn && opponentBoard[row - 1][col - 1] == 0) {
 		console.log("coordinates send: " + coordinates);
 		stompClient.send(`/app/coordinates/${roomId}`, {}, JSON.stringify({'content': coordinates}));
 		$("#whose-turn").prop("disabled", true); 
 		isYourTurn = false;
+	} else if (isYourTurn && opponentBoard[row - 1][col - 1] != 0) {
+		alert("You've already shot that!");
 	} else {
-		alert("ITS NOT YOUR TURN YET!");
+		alert("It's not your turn!");
 	}
 }
 
