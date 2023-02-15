@@ -2,6 +2,7 @@ let stompClient = null;
 let shipCount = 0; 
 const maxShipCount = 3;
 let hasOpponent = false;
+let roomIsReady = false;
 
 
 // Board: |0 - ocean|, |1 - hit|, |2 - miss|,  |3 - ship|
@@ -103,10 +104,8 @@ function connect() {
 			
 			// Game Loop - END
 			if (parsedMessage.type == "battle-finish") {
-				alert("You won!");
-			  	setTimeout(() => { location.reload(); }, 5000);
+				win();
 			}
-			
 			
         });
 		
@@ -122,7 +121,12 @@ function connect() {
 			}
 			if (parsedMessage.type == "usernames") addOpponentUsername(parsedMessage.content);
 
-			if (parsedMessage.type == "user-status-disconnect") removeOpponentUsername();
+			if (parsedMessage.type == "user-status-disconnect") {
+				// opponent left mid game
+				if (roomIsReady) win();
+
+				removeOpponentUsername();
+			}
 
 			
 			// Game Loop - #0 - Room is ready
@@ -130,9 +134,15 @@ function connect() {
 				$('#game-board-prep-board').remove();
 				drawBoard("opponent-board", opponentBoard);
 				drawBoard("my-board", myBoard);
+				roomIsReady = true;
 			}
         });
     });
+}
+
+function win() {
+	alert("You won!");
+  	setTimeout(() => { location.reload(); }, 5000);
 }
 
 function disconnect() {
