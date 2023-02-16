@@ -3,7 +3,7 @@ let shipCount = 0;
 const maxShipCount = 3;
 let hasOpponent = false;
 let roomIsReady = false;
-
+let isReady = false;
 
 
 // Board: |0 - ocean|, |1 - hit|, |2 - miss|,  |3 - ship|
@@ -173,7 +173,7 @@ function addOpponentUsername(usernames) {
 		console.log("usernames: " + username);
 		if (myUsername != username) {
 			document.getElementById("p-vs-p").innerHTML = `Opponent: ${username}`;	
-			if (shipCount == maxShipCount) $("#ready-button").prop("disabled", false); 
+			if (shipCount == maxShipCount && !isReady) $("#ready-button").prop("disabled", false); 
 			hasOpponent = true;
 			return;	
 		}
@@ -221,7 +221,7 @@ function setUpMyCoordinates(coordinates) {
 		alert("That's enough ships!");
 	}
 
-	if (shipCount == maxShipCount && hasOpponent){
+	if (shipCount == maxShipCount && hasOpponent && !isReady){
 		$("#ready-button").prop("disabled", false);
 	}
 }
@@ -402,7 +402,11 @@ $(() => {
     $("#connect").click(() => { connect(); });
     $("#disconnect").click(() => { disconnect(); });
     $("#send").click(() => { sendName(); });
-    $("#ready-button").click(() => { sendReadySignal(); });
+    $("#ready-button").click(() => { 
+		sendReadySignal(); 
+		$("#ready-button").prop("disabled", true); 
+		isReady = true;
+	});
 	$("#copy-room-link-btn").click((e) => { 
 		e.preventDefault();
 		navigator.clipboard.writeText(`${window.location.href}`);
