@@ -5,6 +5,7 @@ let hasOpponent = false;
 let roomIsReady = false;
 let isReady = false;
 let isGameFinished = false;
+let sound = false;
 
 
 // Board: |0 - ocean|, |1 - hit|, |2 - miss|,  |3 - ship|
@@ -70,7 +71,7 @@ function connect() {
         
         drawPrepBoard();
         
-        stompClient.subscribe(`/user/topic/${roomId}`, (message) => {
+        stompClient.subscribe(`/user/topic/${roomId}`, async (message) => {
 			let parsedMessage = JSON.parse(message.body);
 			if (parsedMessage.type == "user-status-alert") showUserStatus(parsedMessage);
 			if (parsedMessage.type == "ready-success") console.log("YOU ARE READY FOR IT");
@@ -95,6 +96,9 @@ function connect() {
 				console.log(`${parsedMessage.content} was a HIT`);
 				drawBoard("opponent-board", opponentBoard);
 				drawBoard("my-board", myBoard);
+				playShot();	
+				await new Promise(resolve => setTimeout(resolve, 1000)); 
+				playHit();
 			}
 			
 			if (parsedMessage.type == "battle-coordinates-miss") {
@@ -102,6 +106,9 @@ function connect() {
 				console.log(`${parsedMessage.content} was a MISS`);
 				drawBoard("opponent-board", opponentBoard);
 				drawBoard("my-board", myBoard);
+				playShot();	
+				await new Promise(resolve => setTimeout(resolve, 1000)); 
+				playMiss();
 			}
 			
 			// Game Loop - END
@@ -396,6 +403,18 @@ function updateOpponentBoard(coordinates, hitMiss) {
 	opponentBoard[row - 1][col - 1] = hitMiss;
 }
 
+function playShot () {
+	if (sound) new Audio('/audio/nyoom.mp3').play();
+}
+
+function playHit() {
+	if (sound) new Audio('/audio/hit.mp3').play();
+}
+
+function playMiss() {
+	if (sound) new Audio('/audio/miss.mp3').play();
+}
+
 $(() => {
     $("form").on('submit', (e) => {
         e.preventDefault();
@@ -411,5 +430,9 @@ $(() => {
 	$("#copy-room-link-btn").click((e) => { 
 		e.preventDefault();
 		navigator.clipboard.writeText(`${window.location.href}`);
+	});
+    $("#sound-btn").click((e) => { 
+		sound = !sound;	
+		sound ? $(e.target).text("SOUND Effects [ON]") : $(e.target).text("SOUND Effects [OFF]");
 	});
 });
