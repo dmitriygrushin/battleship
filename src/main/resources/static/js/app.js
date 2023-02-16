@@ -4,6 +4,7 @@ const maxShipCount = 3;
 let hasOpponent = false;
 let roomIsReady = false;
 let isReady = false;
+let isGameFinished = false;
 
 
 // Board: |0 - ocean|, |1 - hit|, |2 - miss|,  |3 - ship|
@@ -104,31 +105,26 @@ function connect() {
 			}
 			
 			// Game Loop - END
-			if (parsedMessage.type == "battle-finish") {
-				win();
-			}
+			if (parsedMessage.type == "battle-finish") win();
 			
         });
 		
         stompClient.subscribe(`/topic/${roomId}`, (message) => {
 			let parsedMessage = JSON.parse(message.body);
 			
-			// TODO: Refactor to use switch later
-
 			if (parsedMessage.type == "chat-message") showChatMessage(parsedMessage);
 			
 			if (["user-status-alert", "user-status-connect", "user-status-disconnect"].includes(parsedMessage.type)) {
 				showUserStatus(parsedMessage);
 			}
+
 			if (parsedMessage.type == "usernames") addOpponentUsername(parsedMessage.content);
 
 			if (parsedMessage.type == "user-status-disconnect") {
 				// opponent left mid game
 				if (roomIsReady) win();
-
 				removeOpponentUsername();
 			}
-
 			
 			// Game Loop - #0 - Room is ready
 			if (parsedMessage.type == "ready-room-success") {
@@ -142,8 +138,9 @@ function connect() {
 }
 
 function win() {
+  	isGameFinished = true;
 	alert("You won!");
-  	setTimeout(() => { location.reload(); }, 5000);
+  	setTimeout(() => { location.reload(); }, 10000);
 }
 
 function disconnect() {
@@ -192,8 +189,10 @@ function broadcastCoordinates(coordinates) {
 	const row = Number(coordinates.split(",")[0]);
 	const col = Number(coordinates.split(",")[1].charCodeAt(0) - 64); // change from letter to number
 	
-	// make sure that its the user's turn and that the coordinates being sent are not already a hit/miss
-	if (isYourTurn && opponentBoard[row - 1][col - 1] == 0) {
+	
+	if(isGameFinished){
+		alert("Game is finished");
+	} else if (isYourTurn && opponentBoard[row - 1][col - 1] == 0) { 
 		console.log("coordinates send: " + coordinates);
 		stompClient.send(`/app/coordinates/${roomId}`, {}, JSON.stringify({'content': coordinates}));
 		$("#whose-turn").prop("disabled", true); 
@@ -279,7 +278,7 @@ function drawPrepBoard() {
 		gameBoard.appendChild(row);
 	}
 	
-	isAllowedToClickBoard(name);
+	assignBoardOnClickType(name);
 }
 
 function drawBoard(name, array) {
@@ -333,11 +332,12 @@ function drawBoard(name, array) {
 		gameBoard.appendChild(row);
 	}
 	
-	isAllowedToClickBoard(name);
+	assignBoardOnClickType(name);
 	
 }
 
-function isAllowedToClickBoard(name) {
+// depending on the board name different onClick methods will be assigned
+function assignBoardOnClickType(name) {
 	if (name == "opponent-board") {
 		const collections = document.getElementsByClassName("opponent-board-coords");
 		for (const element of collections) {
@@ -366,7 +366,7 @@ function handleBattleCoordinates(coordinates) {
 	
 	console.log(`row: ${row}, col: ${col}`);
 	
-	// broadcasta hit(1)/miss(2)
+	// broadcast a hit(1)/miss(2)
 	if (myBoard[row - 1][col - 1] == 3) {
 		stompClient.send(`/app/hit/${roomId}`, {}, JSON.stringify({'content': coordinates}));
 		$("#whose-turn").prop("disabled", false); 
@@ -376,8 +376,9 @@ function handleBattleCoordinates(coordinates) {
 		--shipCount;
 		if (shipCount < 1) {
 			stompClient.send(`/app/finish/${roomId}`, {}, JSON.stringify({'content': coordinates}));
+			isGameFinished = true;
 			alert("You lost");
-		  	setTimeout(() => { location.reload(); }, 5000);
+		  	setTimeout(() => { location.reload(); }, 10000);
 		}
 	} else {
 		stompClient.send(`/app/miss/${roomId}`, {}, JSON.stringify({'content': coordinates}));
