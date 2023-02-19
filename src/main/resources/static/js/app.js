@@ -20,7 +20,7 @@ let roomId = (() => {
 	return urlParams.get('roomId');
 })();
 
-if (!roomId) alert("You don't have a room number!");
+if (!roomId) displayAlert("You don't have a room number!", "danger");
 
 $("#ready-button").prop("disabled", true); 
 $("#whose-turn").prop("disabled", true); 
@@ -119,7 +119,7 @@ function connect() {
 
 function win() {
   	isGameFinished = true;
-	alert("You won!");
+	displayAlert("You won!", "success");
   	setTimeout(() => { location.reload(); }, 5000);
 }
 
@@ -149,16 +149,16 @@ function broadcastCoordinates(coordinates) {
 	const {row, col} = convertCoordinates(coordinates);
 	
 	if(isGameFinished){
-		alert("Game is finished");
+		displayAlert("Game is finished", "primary");
 	} else if (isYourTurn && opponentBoard[row - 1][col - 1] == 0) { 
 		console.log("coordinates send: " + coordinates);
 		stompClient.send(`/app/coordinates/${roomId}`, {}, JSON.stringify({'content': coordinates}));
 		$("#whose-turn").prop("disabled", true); 
 		isYourTurn = false;
 	} else if (isYourTurn && opponentBoard[row - 1][col - 1] != 0) {
-		alert("You've already shot that!");
+		displayAlert("You've already shot that!", "warning");
 	} else {
-		alert("It's not your turn!");
+		displayAlert("It's not your turn!", "warning");
 	}
 }
 
@@ -174,7 +174,7 @@ function setUpMyCoordinates(coordinates) {
 			++shipCount;
 		}	
 	} else {
-		alert("That's enough ships!");
+		displayAlert("That's enough ships!", "warning");
 	}
 
 	if (shipCount == maxShipCount && hasOpponent && !isReady) $("#ready-button").prop("disabled", false);
@@ -251,7 +251,7 @@ function handleBattleCoordinates(coordinates) {
 		if (shipCount < 1) {
 			stompClient.send(`/app/finish/${roomId}`, {}, JSON.stringify({'content': coordinates}));
 			isGameFinished = true;
-			alert("You lost");
+			displayAlert("You lost", "danger");
 		  	setTimeout(() => { location.reload(); }, 5000);
 		}
 	} else {
@@ -279,6 +279,17 @@ function playSound(type) {
 		if (type == 1) 	new Audio('/audio/hit.mp3').play()
 		if (type == 2) 	new Audio('/audio/miss.mp3').play()
 	}
+}
+
+function displayAlert(text, type) {
+	$(".alert").addClass(`alert-${type}`);
+	$(".alert").text(text);
+	$(".alert").show("large");
+	
+  	setTimeout(() => { 
+		$(".alert").hide("large");
+		$(".alert").removeClass(`alert-${type}`);
+	}, 3000);
 }
 
 $(() => {
