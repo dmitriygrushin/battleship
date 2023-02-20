@@ -6,6 +6,8 @@ let roomIsReady = false;
 let isReady = false;
 let isGameFinished = false;
 let sound = false;
+let winGif = "https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExNmFiMTFlZjQzYWZjZGQ3MGNhNTdiY2YxODc1M2NjNDI0MWZmMTQ5NiZjdD1n/QO29TZCWS7wctOyvkB/giphy.gif";
+let lossGif = "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExNWQ3NjkwMmU5NjRiMDc0NWY4ZTFjZDNmYThhNmUyYzkxMTVmOTc4ZiZjdD1n/YQ4EWEtjNGHa4lVhAL/giphy.gif";
 
 // Board: |0 - ocean|, |1 - hit|, |2 - miss|,  |3 - ship|
 
@@ -118,9 +120,25 @@ function connect() {
 }
 
 function win() {
+	$("#winLossModalTitle").text("You WIN!");
+	$("#winLossModalTitle").addClass("text-success");
   	isGameFinished = true;
 	displayAlert("You won!", "success");
-  	setTimeout(() => { location.reload(); }, 5000);
+	$("#winLossGif").prop("src", winGif);
+	$("#winLossModalBtn").trigger("click");
+	playSound(3);
+  	setTimeout(() => { location.reload(); }, 7000);
+}
+
+function loss() {
+	$("#winLossModalTitle").text("You LOST!");
+	$("#winLossModalTitle").addClass("text-danger");
+	isGameFinished = true;
+	displayAlert("You lost", "danger");
+	$("#winLossGif").prop("src", lossGif);
+	$("#winLossModalBtn").trigger("click");
+	playSound(4);
+	setTimeout(() => { location.reload(); }, 7000);
 }
 
 function disconnect() {
@@ -249,10 +267,9 @@ function handleBattleCoordinates(coordinates) {
 
 		--shipCount;
 		if (shipCount < 1) {
+			// lost 
 			stompClient.send(`/app/finish/${roomId}`, {}, JSON.stringify({'content': coordinates}));
-			isGameFinished = true;
-			displayAlert("You lost", "danger");
-		  	setTimeout(() => { location.reload(); }, 5000);
+			loss();
 		}
 	} else {
 		stompClient.send(`/app/miss/${roomId}`, {}, JSON.stringify({'content': coordinates}));
@@ -278,6 +295,8 @@ function playSound(type) {
 		if (type == 0) 	new Audio('/audio/nyoom.mp3').play()
 		if (type == 1) 	new Audio('/audio/hit.mp3').play()
 		if (type == 2) 	new Audio('/audio/miss.mp3').play()
+		if (type == 3) 	new Audio('/audio/win.mp3').play()
+		if (type == 4) 	new Audio('/audio/loss.mp3').play()
 	}
 }
 

@@ -28,6 +28,7 @@
 					<button id="ready-button" class="btn btn-info">GET READY</button>
 					<!-- button trigger modal -->
 					<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">Chat</button>
+					<button type="button" id="winLossModalBtn" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#winLossModal" hidden=hidden></button>
 					<button type="button" id="whose-turn" class="btn btn-warning">Your Turn</button>
 					<button type="button" id="copy-room-link-btn" class="btn btn-secondary">Copy Room Link</button>
 					<button type="button" id="sound-btn" class="btn btn-secondary">SOUND Effects [OFF]</button>
@@ -45,12 +46,12 @@
 	</div>
 </div>
 
-<!-- Modal -->
+<!-- Modal Chat -->
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+        <h5 class="modal-title" id="exampleModalLabel">Chat</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -79,6 +80,22 @@
 			</div>
 		</div>
       <!--  -->
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal WIN/LOSS-->
+<div class="modal fade" id="winLossModal" tabindex="-1" aria-labelledby="winLossModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="winLossModalTitle">Modal title</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+		<img id="winLossGif" src="" />
       </div>
     </div>
   </div>
