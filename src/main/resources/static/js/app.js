@@ -1,6 +1,6 @@
 let stompClient = null;
 let shipCount = 0; 
-const maxShipCount = 3;
+const maxShipCount = 10;
 let hasOpponent = false;
 let roomIsReady = false;
 let isReady = false;
