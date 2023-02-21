@@ -54,7 +54,8 @@ function connect() {
 
 			switch(parsedMessage.type) {
 				case "user-status-alert":
-					$("#messages").append("<tr><td>" + parsedMessage.content + ": status" + "</td></tr>"); // show user status
+					//$("#messages").append("<tr><td>" + parsedMessage.content + ": status" + "</td></tr>"); // show user status
+					displayAlert(parsedMessage.content, "info");
 					break;
 			  	case "ready-room-battle":
 					$("#whose-turn").prop("disabled", false); 
@@ -98,13 +99,13 @@ function connect() {
 					break;
 			  	case "user-status-alert":
 			  	case "user-status-connect":
-					$("#messages").append("<tr><td>" + parsedMessage.content + ": status" + "</td></tr>"); // show user status
+					//displayAlert(parsedMessage.content, "info");
 					break;
 			  	case "usernames":
 					addOpponentUsername(parsedMessage.content);
 					break;
 			  	case "user-status-disconnect":
-					$("#messages").append("<tr><td>" + parsedMessage.content + ": status" + "</td></tr>"); // show user status
+					//displayAlert(parsedMessage.content, "info");
 					if (roomIsReady) win(); // opponent left mid game
 					$("#p-vs-p").text("Waiting for opponent...");
 					break;
@@ -229,7 +230,7 @@ function drawBoard(name, array) {
 				} else if (array[i - 1][j - 1] == 2) {
 					col.textContent = "❌";
 				} else if (array[i - 1][j - 1] == 3) {
-					col.textContent = "🚢";
+					col.textContent = "⛵";
 				} else {
 					col.textContent = "🌊";
 				}

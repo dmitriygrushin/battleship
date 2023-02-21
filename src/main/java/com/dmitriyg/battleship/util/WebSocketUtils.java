@@ -25,30 +25,8 @@ public class WebSocketUtils {
 	@Autowired
 	private SimpUserRegistry userRegistry;
 	
-	public void updateUserList(SimpMessageHeaderAccessor headers) {
-		String destination; // null if messageType is disconnect
-		String messageType;
-
-		if (headers.getMessageType() == SimpMessageType.SUBSCRIBE) {
-			destination = headers.getDestination(); 
-			messageType = "user-status-connect";
-		} else if (headers.getMessageType() == SimpMessageType.DISCONNECT) {
-			UserSession userSession = userSessionService.find(headers.getSessionId());
-			if (userSession == null) return;
-			destination = userSession.getDestination();
-			messageType = "user-status-disconnect";
-		} else {
-			return;
-		}
-
-		Set<String> users = userSessionService.findUsersSubscribedToTopic(destination);
-
-		simpMessagingTemplate.convertAndSend(destination, 
-				new MessagingData<String>(messageType, HtmlUtils.htmlEscape("there are now (" + users.size() + ") users in room: " + destination)));
-		
-	}
-	
-	public void sendOpponentUsername(SimpMessageHeaderAccessor headers) {
+	// send usernames from client to remove their name which leaves them with opponent's username
+	public void sendUsernames(SimpMessageHeaderAccessor headers) {
 		if (headers.getMessageType() == SimpMessageType.SUBSCRIBE) {
 			String destination = headers.getDestination();
 			Set<String> users = userSessionService.findUsersSubscribedToTopic(destination);

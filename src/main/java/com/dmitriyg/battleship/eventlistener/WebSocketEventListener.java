@@ -28,8 +28,7 @@ public class WebSocketEventListener {
 
 		userSessionService.add(headers);
 		webSocketUtils.alertDestination(headers);
-		webSocketUtils.updateUserList(headers);
-		webSocketUtils.sendOpponentUsername(headers);
+		webSocketUtils.sendUsernames(headers);
 	}
 
 	@EventListener
@@ -37,7 +36,6 @@ public class WebSocketEventListener {
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(event.getMessage());
 		
 		webSocketUtils.alertDestination(headers);
-		webSocketUtils.updateUserList(headers);
 		userSessionService.remove(headers); // remove userSession at the end else previous methods won't have access to it
 	}
 
