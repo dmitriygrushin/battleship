@@ -47,7 +47,6 @@ public class WebSocketController {
 			// for the sake of simplicity the first user to get ready will go first
 			webSocketUtils.broadcastToTopic(principal.getName(), "/topic/" + roomId, 
 					new MessagingData<>("ready-room-battle", ""));
-
 		}
 	}
 	

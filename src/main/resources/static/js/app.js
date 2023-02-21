@@ -85,7 +85,7 @@ function connect() {
 					playSound(2);
 					break;
 			  	case "battle-finish":
-					win();
+					endGame(true);
 					break;
 				}
         });
@@ -97,16 +97,12 @@ function connect() {
 				case "chat-message":
 					$("#messages").append("<tr><td>" + parsedMessage.content + "</td></tr>"); // show user message
 					break;
-			  	case "user-status-alert":
-			  	case "user-status-connect":
-					//displayAlert(parsedMessage.content, "info");
-					break;
 			  	case "usernames":
 					addOpponentUsername(parsedMessage.content);
 					break;
 			  	case "user-status-disconnect":
 					//displayAlert(parsedMessage.content, "info");
-					if (roomIsReady) win(); // opponent left mid game
+					if (roomIsReady) endGame(true); // opponent left mid game
 					$("#p-vs-p").text("Waiting for opponent...");
 					break;
 			  	case "ready-room-success":
@@ -120,26 +116,25 @@ function connect() {
     });
 }
 
-function win() {
-	$("#winLossModalTitle").text("You WIN!");
-	$("#winLossModalTitle").addClass("text-success");
-  	isGameFinished = true;
-	displayAlert("You won!", "success");
-	$("#winLossGif").prop("src", winGif);
-	$("#winLossModalBtn").trigger("click");
-	playSound(3);
-  	setTimeout(() => { location.reload(); }, 7000);
-}
 
-function loss() {
-	$("#winLossModalTitle").text("You LOST!");
-	$("#winLossModalTitle").addClass("text-danger");
+function endGame(isWin) {
+	if (isWin) {
+		$("#winLossModalTitle").text("You WIN!");
+		$("#winLossModalTitle").addClass("text-success");
+		displayAlert("You won!", "success");
+		$("#winLossGif").prop("src", winGif);
+		playSound(3);
+	} else {
+		$("#winLossModalTitle").text("You LOST!");
+		$("#winLossModalTitle").addClass("text-danger");
+		displayAlert("You lost", "danger");
+		$("#winLossGif").prop("src", lossGif);
+		playSound(4);
+	}
 	isGameFinished = true;
-	displayAlert("You lost", "danger");
-	$("#winLossGif").prop("src", lossGif);
 	$("#winLossModalBtn").trigger("click");
-	playSound(4);
 	setTimeout(() => { location.reload(); }, 7000);
+		
 }
 
 function disconnect() {
@@ -270,7 +265,7 @@ function handleBattleCoordinates(coordinates) {
 		if (shipCount < 1) {
 			// lost 
 			stompClient.send(`/app/finish/${roomId}`, {}, JSON.stringify({'content': coordinates}));
-			loss();
+			endGame(false);
 		}
 	} else {
 		stompClient.send(`/app/miss/${roomId}`, {}, JSON.stringify({'content': coordinates}));
