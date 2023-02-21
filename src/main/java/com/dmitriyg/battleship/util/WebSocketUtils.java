@@ -25,25 +25,31 @@ public class WebSocketUtils {
 	@Autowired
 	private SimpUserRegistry userRegistry;
 	
-	public void updateUserList(SimpMessageHeaderAccessor headers) {
-		String destination; // null if messageType is disconnect
-		String messageType;
+	public void processUserSession(SimpMessageHeaderAccessor headers) {
+		String username;
+		String destination;
+		String userStatusType;
 
 		if (headers.getMessageType() == SimpMessageType.SUBSCRIBE) {
-			destination = headers.getDestination(); 
-			messageType = "user-status-connect";
+			username = headers.getUser().getName();
+			destination = headers.getDestination();
+			userStatusType = "user-status-connect";
+			broadcastToTopic(username, destination, new MessagingData<>("user-status-alert", HtmlUtils.htmlEscape("---" + username + " has JOINED the room!---")));
 		} else if (headers.getMessageType() == SimpMessageType.DISCONNECT) {
 			UserSession userSession = userSessionService.find(headers.getSessionId());
 			if (userSession == null) return;
+			username = userSession.getPrincipal().getName();
 			destination = userSession.getDestination();
-			messageType = "user-status-disconnect";
+			userStatusType = "user-status-disconnect";
+			broadcastToTopic(username, destination, new MessagingData<>("user-status-alert", HtmlUtils.htmlEscape("---" + username + " has LEFT the room!---")));
 		} else {
 			return;
 		}
 
-		simpMessagingTemplate.convertAndSend(destination, new MessagingData<String>(messageType, ""));
-		
+		simpMessagingTemplate.convertAndSend(destination, new MessagingData<String>(userStatusType, ""));
 	}
+
+	
 	
 	// send usernames from client to remove their name which leaves them with opponent's username
 	public void sendUsernames(SimpMessageHeaderAccessor headers) {
@@ -55,30 +61,6 @@ public class WebSocketUtils {
 		}
 	}
 	
-	public void alertDestination(SimpMessageHeaderAccessor headers) {
-		String username;
-		String destination; // null if messageType is disconnect
-		String message;
-		
-		// Alerts need to only work on subscribe and disconnect 
-		if (headers.getMessageType() == SimpMessageType.SUBSCRIBE) {
-			username = headers.getUser().getName();
-			destination = headers.getDestination(); // null if messageType is disconnect
-			message = " has JOINED the room!---";
-		} else if (headers.getMessageType() == SimpMessageType.DISCONNECT) {
-			UserSession userSession = userSessionService.find(headers.getSessionId());
-			if (userSession == null) return;
-			username = userSession.getPrincipal().getName();
-			destination = userSession.getDestination();
-			message = " has LEFT the room!---";
-		} else {
-			return;
-		}
-
-		broadcastToTopic(username, destination, 
-				new MessagingData<>("user-status-alert", HtmlUtils.htmlEscape("---" + username + message)));
-
-	}
 	
 	// send message to all subscribers of a topic except the sender
 	public void broadcastToTopic(String broadcasterUsername, String destination, MessagingData<String> message) {

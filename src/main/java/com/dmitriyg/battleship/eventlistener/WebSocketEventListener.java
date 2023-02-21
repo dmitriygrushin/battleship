@@ -27,8 +27,7 @@ public class WebSocketEventListener {
 		if (headers.getDestination().indexOf("/user") == 0) return;
 
 		userSessionService.add(headers);
-		webSocketUtils.alertDestination(headers);
-		webSocketUtils.updateUserList(headers);
+		webSocketUtils.processUserSession(headers);
 		webSocketUtils.sendUsernames(headers);
 	}
 
@@ -36,8 +35,7 @@ public class WebSocketEventListener {
 	private void handleSessionDisconnected(SessionDisconnectEvent event) {
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(event.getMessage());
 		
-		webSocketUtils.alertDestination(headers);
-		webSocketUtils.updateUserList(headers);
+		webSocketUtils.processUserSession(headers);
 		userSessionService.remove(headers); // remove userSession at the end else previous methods won't have access to it
 	}
 
