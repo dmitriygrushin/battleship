@@ -54,7 +54,6 @@ function connect() {
 
 			switch(parsedMessage.type) {
 				case "user-status-alert":
-					//$("#messages").append("<tr><td>" + parsedMessage.content + ": status" + "</td></tr>"); // show user status
 					displayAlert(parsedMessage.content, "info");
 					break;
 			  	case "ready-room-battle":
@@ -101,7 +100,6 @@ function connect() {
 					addOpponentUsername(parsedMessage.content);
 					break;
 			  	case "user-status-disconnect":
-					//displayAlert(parsedMessage.content, "info");
 					if (roomIsReady) endGame(true); // opponent left mid game
 					$("#p-vs-p").text("Waiting for opponent...");
 					break;
