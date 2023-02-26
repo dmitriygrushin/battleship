@@ -33,7 +33,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
 	@Override
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
-		registry.addEndpoint("/fallback-websocket").withSockJS(); // SockJS fallback 
+		// NOTE TO SELF!: .setAllowedOriginsPatterns("*") allows Web Socket to work on server using Nginx, but imposes CSRF attacks so that would need to be handled if the application wasn't just a silly game. 
+		registry.addEndpoint("/fallback-websocket").setAllowedOriginPatterns("*").withSockJS(); 
 	}
 	
 	/* clientInboundChannel: For passing messages received from WebSocket clients.
